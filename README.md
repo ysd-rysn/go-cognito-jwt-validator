@@ -8,7 +8,7 @@
 
 ```bash
   # Add to your go project using:
-  go get github.com/eryk-vieira/go-cognito-jwt-validator
+  go get github.com/ysd-rysn/go-cognito-jwt-validator
 ```
 
 ### :technologist: Usage
@@ -17,7 +17,7 @@
 package main
 
 import (
-  validator "github.com/eryk-vieira/go-cognito-jwt-validator"
+  validator "github.com/ysd-rysn/go-cognito-jwt-validator"
 )
 
 func main(){
