@@ -22,7 +22,7 @@ func New(config *Config) *Config {
 	return config
 }
 
-func (config *Config) Validate(jwtToken string) error {
+func (config *Config) Validate(jwtToken string) (jwt.Token, error) {
 	pKey, err := getPublicKeys(config.Region, config.CognitoPoolId)
 
 	if err != nil {
@@ -34,29 +34,32 @@ func (config *Config) Validate(jwtToken string) error {
 	parsedToken, err := jwt.Parse([]byte(jwtToken), jwt.WithKeySet(keySet))
 
 	if err != nil {
-		return errors.New("INVALID TOKEN")
+		return nil, errors.New("INVALID TOKEN")
 	}
 
 	clientId, _ := parsedToken.Get("aud")
 	token_use, _ := parsedToken.Get("token_use")
+	if token_use == "access" {
+		clientId, _ = parsedToken.Get("client_id")
+	}
 
 	if clientId.([]string)[0] != config.CognitoClientId {
-		return errors.New("TOKEN IS FROM A DIFFERENT client_id")
+		return nil, errors.New("TOKEN IS FROM A DIFFERENT client_id")
 	}
 
 	if parsedToken.Issuer() != fmt.Sprintf("https://cognito-idp.%s.amazonaws.com/%s", config.Region, config.CognitoPoolId) {
-		return errors.New("TOKEN IS FROM A DIFFERENT pool_id")
+		return nil, errors.New("TOKEN IS FROM A DIFFERENT pool_id")
 	}
 
 	if token_use != "id" && token_use != "access" {
-		return errors.New("TOKEN IS FROM A DIFFERENT source")
+		return nil, errors.New("TOKEN IS FROM A DIFFERENT source")
 	}
 
 	if time.Now().After(parsedToken.Expiration()) {
-		return errors.New("TOKEN EXPIRED")
+		return nil, errors.New("TOKEN EXPIRED")
 	}
 
-	return nil
+	return parsedToken, nil
 }
 
 func getPublicKeys(region string, cognitoPoolId string) ([]byte, error) {
