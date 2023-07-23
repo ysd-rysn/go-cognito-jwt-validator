@@ -1,4 +1,4 @@
-module gitub.com/ysd-rysn/go-cognito-jwt-validator
+module github.com/ysd-rysn/go-cognito-jwt-validator
 
 go 1.20
 
